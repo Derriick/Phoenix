@@ -515,7 +515,7 @@ class mupdfProcessor(object):
         matrix = fitz.Matrix(scale, scale)
         try:
             pix = page.getPixmap(matrix=matrix)   # MUST be keyword arg(s)
-            bmp = wx.Bitmap.FromBufferRGBA(pix.width, pix.height, pix.samples)
+            bmp = wx.Bitmap.FromBuffer(pix.width, pix.height, pix.samples)
             gc.DrawBitmap(bmp, 0, 0, pix.width, pix.height)
             self.zoom_error = False
         except (RuntimeError, MemoryError):
