@@ -1,2 +1,0 @@
-
-    setlocale(LC_ALL, "")

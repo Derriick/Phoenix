@@ -1,2 +1,0 @@
-
-    AddBook("help.zip")

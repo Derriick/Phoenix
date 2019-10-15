@@ -1,4 +1,0 @@
-# Runtime dependencies needed when using wxPython Phoenix
-numpy
-pillow
-six
