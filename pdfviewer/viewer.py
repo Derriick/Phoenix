@@ -515,7 +515,10 @@ class mupdfProcessor(object):
         matrix = fitz.Matrix(scale, scale)
         try:
             pix = page.getPixmap(matrix=matrix)   # MUST be keyword arg(s)
-            bmp = wx.Bitmap.FromBuffer(pix.width, pix.height, pix.samples)
+            if mupdf:
+                bmp = wx.Bitmap.FromBuffer(pix.width, pix.height, pix.samples)
+            else:
+                bmp = wx.Bitmap.FromBufferRGBA(pix.width, pix.height, pix.samples)
             gc.DrawBitmap(bmp, 0, 0, pix.width, pix.height)
             self.zoom_error = False
         except (RuntimeError, MemoryError):
@@ -1057,16 +1060,32 @@ class pdfPrintout(wx.Printout):
         generated bitmap and sfac sets it to a high enough resolution that
         reduces anti-aliasing blur but keeps it small to minimise printing time
         """
-        sfac = 1.0
         if mupdf:
             sfac = 4.0
+        else:
+            sfac = 1.0
         pageno = page - 1       # zero based
         width = self.view.pagewidth
         height = self.view.pageheight
         self.FitThisSizeToPage(wx.Size(width*sfac, height*sfac))
         dc = self.GetDC()
         gc = wx.GraphicsContext.Create(dc)
-        if not mupdf:
+        if mupdf:
+            (w_page, h_page) = self.GetPageSizePixels()
+            rw = w_page / width
+            rh = h_page / height
+
+            if rw < rh:
+                width = w_page
+                height *= rw
+            else:
+                width *= rh
+                height = h_page
+
+            x = (w_page - width) / 4
+            y = (h_page - height) / 4
+            gc.Translate(x, y)
+        else:
             gc.Translate(0, height)
         if wx.PlatformInfo[1] == 'wxMSW' and have_cairo:
             device_scale = wx.ClientDC(self.view).GetPPI()[0]/72.0   # pixels per inch/ppi
@@ -1074,4 +1093,3 @@ class pdfPrintout(wx.Printout):
 
         self.view.pdfdoc.RenderPage(gc, pageno, sfac)
         return True
-
