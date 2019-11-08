@@ -1070,20 +1070,19 @@ class pdfPrintout(wx.Printout):
         self.FitThisSizeToPage(wx.Size(width*sfac, height*sfac))
         dc = self.GetDC()
         gc = wx.GraphicsContext.Create(dc)
+
         if mupdf:
             (w_page, h_page) = self.GetPageSizePixels()
-            rw = w_page / width
-            rh = h_page / height
+            rw = width  / w_page
+            rh = height / h_page
 
-            if rw < rh:
-                width = w_page
-                height *= rw
-            else:
-                width *= rh
-                height = h_page
+            r = max(rw, rh)
+            w_page *= r
+            h_page *= r
 
-            x = (w_page - width) / 4
-            y = (h_page - height) / 4
+            x = (w_page - width) * 2
+            y = (h_page - height) * 2
+
             gc.Translate(x, y)
         else:
             gc.Translate(0, height)
